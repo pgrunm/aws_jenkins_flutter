@@ -1,0 +1,5 @@
+amazon-ecs:1.37
+configuration-as-code:1.46
+workflow-aggregator:2.6
+artifact-manager-s3:1.12
+git:4.5.1

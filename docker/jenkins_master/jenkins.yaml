@@ -1,0 +1,78 @@
+jenkins:
+  slaveAgentPort: 50000
+  # System Message which is displayed on the Dashboard.
+  systemMessage: Jenkins Master for FOM Bachelor Thesis
+  agentProtocols:
+    - JNLP4-connect
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  remotingSecurity:
+    enabled: true
+  securityRealm:
+    local:
+      allowsSignup: false
+      # Create the local administrator account with data from environment variables
+      users:
+        - id: ${JENKINS_ADMIN_USERNAME}
+          password: ${JENKINS_ADMIN_PASSWORD}
+  clouds:
+    - ecs:
+        credentialsId: ""
+        # ECS Cluster ARN
+        cluster: ${ECS_CLUSTER_NAME}
+        name: ecs-cloud
+        # Environment Variable for the AWS Region e. g. eu-central-1
+        regionName: ${AWS_REGION_NAME}
+        # Local Jenkins URL, also populated by environment variable,
+        # default is master.jenkins.local
+        jenkinsUrl: ${JENKINS_URL}
+        tunnel: ${LOCAL_JENKINS_URL}
+        templates:
+          - assignPublicIp: true
+            # Amount of CPU Resources, configured in Terraform files
+            cpu: ${CPU_AMOUNT}
+            memoryReservation: ${MEMORY_AMOUNT}
+            executionRole: ${EXECUTION_ROLE_ARN}
+            # Name of the Docker image used -> also environment file
+            image: ${IMAGE_NAME}
+            label: Flutter
+            launchType: FARGATE
+            logDriver: awslogs
+            # Logging Options for AWS Cloudwatch,
+            # populated mainly by environment variables.
+            logDriverOptions:
+              - name: awslogs-group
+                value: ${LOG_GROUP_NAME}
+              - name: awslogs-region
+                value: ${AWS_REGION}
+              - name: awslogs-stream-prefix
+                value: jenkins-agent
+            securityGroups: ${SECURITY_GROUP_IDS}
+            subnets: ${SUBNETS}
+            templateName: jenkins-flutter-agent
+            # AWS Fargate platform version, "Latest" refers to 1.3.0 but 1.4.0 is the latest -> environment variable.
+            platformVersion: "${PLATFORM_VERSION}"
+            # List of environment variables for the Jenkins Agent.
+            # Contains stuff like AWS CLI environment variables etc.
+            # which are populated in the variables.tf file.
+            # Has to be changed, because environment variables are displayed,
+            # see https://preview.tinyurl.com/y3eg6kav.
+            # Like AWS Configuration as Code Secrets Manager Plugin: 
+            # https://plugins.jenkins.io/configuration-as-code-secret-ssm/
+            environments:
+            - name: "AWS_ACCESS_KEY_ID"
+              value: "${AWS_ACCESS_KEY_ID}"
+            - name: "AWS_SECRET_ACCESS_KEY"
+              value: "${AWS_SECRET_ACCESS_KEY}"
+            - name: "AWS_DEFAULT_REGION"
+              value: "${AWS_DEFAULT_REGION}"
+aws:
+  s3:
+    # AWS S3 Bucket Name
+    container: "${BUCKET_NAME}"
+    disableSessionToken: false
+    # Bucket Folder
+    prefix: "${S3_FOLDER_PREFIX}/"
+    useHttp: false
+    usePathStyleUrl: false

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flow-definition>
+	<actions/>
+	<description/>
+	<keepDependencies>false</keepDependencies>
+	<properties/>
+	<triggers/>
+	<definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition">
+		<script>
+pipeline {
+    agent {
+        label 'Flutter'
+    }
+
+    stages {
+        stage('Agent Test') {
+            steps {
+                echo 'This is a text example for newly created Jenkins Flutter agents!'
+            }
+        }
+    }
+}
+        </script>
+		<sandbox>true</sandbox>
+	</definition>
+</flow-definition>
